@@ -38,9 +38,12 @@ app.get("/", (req, res) => {
   res.send(html);
 });
 
-app.get('/posts/:id', (req, res) => {
+app.get('/posts/:id', (req, res, next) => {
   const id = req.params.id;
   const post = postBank.find(id);
+  if (!post.id) {
+    next(err)
+  }
   const htmlPost = `<!DOCTYPE html>
   <html>
     <head>
@@ -63,20 +66,14 @@ app.get('/posts/:id', (req, res) => {
     </body>
   </html>`
   res.send(htmlPost)
-})
+});
 
-// app.get('/error', (req, res) => {
-//   res.send("404: Page Not Found!")
-// })
+app.use((err, req, res, next) => {
+  console.error(err.stack)
+  res.status(404).send('Error 404! Page Not Found!')
+});
 
-// app.use((error, req, res, next) => {
-//   console.error('Error: ', error)
- 
-//   if (error.type == 'redirect')
-//       res.redirect('/error')
-// })
-
-const PORT = 1337;
+const { PORT = 1337 } = process.env;
 
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`);
